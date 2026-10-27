@@ -1583,20 +1583,6 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://pub.dev/packages/js/versions/0.6.7.tar.gz",
-        "sha256": "f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3",
-        "strip-components": 0,
-        "dest": ".pub-cache/hosted/pub.dev/js-0.6.7"
-    },
-    {
-        "type": "inline",
-        "contents": "f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3",
-        "dest": ".pub-cache/hosted-hashes/pub.dev",
-        "dest-filename": "js-0.6.7.sha256"
-    },
-    {
-        "type": "archive",
-        "archive-type": "tar-gzip",
         "url": "https://pub.dev/packages/json_annotation/versions/4.12.0.tar.gz",
         "sha256": "2a743920d81b7910627f68ee2c9ac1fc0bfee32b9fc3403587d7c6791ca12f80",
         "strip-components": 0,
@@ -2297,14 +2283,14 @@
     {
         "type": "git",
         "url": "https://codeberg.org/Berker/qr_code_scanner.git",
-        "commit": "0faf8b8efab537aaf479f83da1f734e8e02a4ca7",
-        "dest": ".pub-cache/git/qr_code_scanner-0faf8b8efab537aaf479f83da1f734e8e02a4ca7"
+        "commit": "2e01fd7f57e2ab81bb4959cea88715b6f5df60d4",
+        "dest": ".pub-cache/git/qr_code_scanner-2e01fd7f57e2ab81bb4959cea88715b6f5df60d4"
     },
     {
         "type": "shell",
         "commands": [
             "mkdir -p .pub-cache/git/cache/qr_code_scanner-e6127a9a50aa2a5a2eb783c51749c77dde0dc249",
-            "cp -rf .pub-cache/git/qr_code_scanner-0faf8b8efab537aaf479f83da1f734e8e02a4ca7/.git/* .pub-cache/git/cache/qr_code_scanner-e6127a9a50aa2a5a2eb783c51749c77dde0dc249"
+            "cp -rf .pub-cache/git/qr_code_scanner-2e01fd7f57e2ab81bb4959cea88715b6f5df60d4/.git/* .pub-cache/git/cache/qr_code_scanner-e6127a9a50aa2a5a2eb783c51749c77dde0dc249"
         ]
     },
     {

@@ -10,9 +10,31 @@ finish-args:
   - --socket=fallback-x11
   - --socket=wayland
   - --device=dri
+  # Camera access for the QR scanner (V4L2 / libcamera nodes).
+  - --device=all
+  - --filesystem=/run/udev:ro
+  - --talk-name=org.freedesktop.secrets
   - --share=network
 modules:
   - flutter-sdk-3.44.9.json
+  - name: zxing-cpp
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DBUILD_SHARED_LIBS=ON
+      - -DZXING_EXAMPLES=OFF
+      - -DZXING_UNIT_TESTS=OFF
+      - -DZXING_BLACKBOX_TESTS=OFF
+      - -DZXING_WRITERS=OFF
+      - -DZXING_PYTHON_MODULE=OFF
+    sources:
+      # qr_code_scanner's Linux implementation links against zxing-cpp 2.x,
+      # which the freedesktop runtime/sdk does not ship.
+      - type: archive
+        url: https://github.com/zxing-cpp/zxing-cpp/archive/refs/tags/v2.3.0.tar.gz
+        sha256: 64e4139103fdbc57752698ee15b5f0b0f7af9a0331ecbdc492047e0772c417ba
   - name: Keyoxide
     buildsystem: simple
     build-options:
@@ -27,6 +49,9 @@ modules:
       prepend-ld-library-path: /usr/lib/sdk/llvm22/lib
       env:
         PUB_CACHE: /run/build/Keyoxide/.pub-cache
+        # zxing-cpp is built into /app before the app; point CMake at it.
+        CMAKE_PREFIX_PATH: /app
+        ZXing_DIR: /app/lib/cmake/ZXing
     build-commands:
       - flutter pub get --offline
       - flutter build linux --release --no-pub --target lib/app/flavors/main_production.dart
@@ -42,7 +67,95 @@ modules:
       - install -Dm644 packaging/flatpak/icons/org.keyoxide.Keyoxide.svg /app/share/icons/hicolor/scalable/apps/org.keyoxide.Keyoxide.svg
     sources:
       - type: archive
-        url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.4/keyoxide-flutter-src.tar.gz
+        url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.5/keyoxide-flutter-src.tar.gz
         strip-components: 0
-        sha256: 626e838edbcc2e6508fc10e6087b06fbecb443bab715b8c3b9d0d54b04fb069b
+        sha256: 9454d287a4c4b6d807c0f4538da1a1d8054b9c854e6ddaa5f11514af691c565a
       - pubspec-sources.json
+
+  - name: libyaml
+    buildsystem: autotools
+    config-opts:
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://pyyaml.org/download/libyaml/yaml-0.2.5.tar.gz
+        sha256: c642ae9b75fee120b2d96c712538bd2cf283228d2337df2cf2988e3c02678ef4
+
+  - name: libyuv
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+    # libyuv installs no pkg-config file; libcamera looks it up that way.
+    post-install:
+      - |
+        mkdir -p /app/lib/pkgconfig
+        printf '%s\n' \
+          'prefix=/app' \
+          'libdir=/app/lib' \
+          'includedir=/app/include' \
+          'Name: libyuv' \
+          'Description: YUV conversion and scaling library' \
+          'Version: 0.0.0' \
+          'Libs: -L/app/lib -lyuv' \
+          'Cflags: -I/app/include' \
+          > /app/lib/pkgconfig/libyuv.pc
+    sources:
+      - type: git
+        url: https://chromium.googlesource.com/libyuv/libyuv.git
+        commit: 500f45652c459cfccd20f83f297eb66cb7b015cb
+
+  # libcamera's build-time helpers need jinja2, PyYAML and ply; the SDK does
+  # not ship them. Install the aarch64 wheels only while libcamera builds.
+  - name: libcamera-python-deps
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/lib/python3.14/site-packages
+      - python3 -c "import glob, zipfile; [zipfile.ZipFile(w).extractall('/app/lib/python3.14/site-packages') for w in glob.glob('*.whl')]"
+    cleanup:
+      - /lib/python3.14/site-packages
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl
+        sha256: 85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
+      - type: file
+        url: https://files.pythonhosted.org/packages/9a/a8/73a81135e85ba66217f5af7facb03bbb386807e1a729ab64532e4c802652/markupsafe-3.0.4-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+        sha256: 1caa2fa5a6184fb233153b35f654e6687bd555476f6170f29d8ee9be1a8b0af9
+      - type: file
+        url: https://files.pythonhosted.org/packages/92/b5/47e807c2623074914e29dabd16cbbdd4bf5e9b2db9f8090fa64411fc5382/pyyaml-6.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl
+        sha256: 501a031947e3a9025ed4405a168e6ef5ae3126c59f90ce0cd6f2bfc477be31b7
+      - type: file
+        url: https://files.pythonhosted.org/packages/a3/58/35da89ee790598a0700ea49b2a66594140f44dec458c07e8e3d4979137fc/ply-3.11-py2.py3-none-any.whl
+        sha256: 096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce
+
+  - name: libcamera
+    buildsystem: meson
+    config-opts:
+      - -Dlibdir=lib
+      # Exclude the Raspberry Pi pipelines: rpi/pisp downloads libpisp
+      # with a Meson subproject fallback, which an offline build cannot do.
+      - -Dpipelines=ipu3,mali-c55,rkisp1,simple,uvcvideo,vimc,virtual
+      - -Dipas=ipu3,mali-c55,rkisp1,simple,vimc
+      - -Dgstreamer=enabled
+      - -Dpycamera=disabled
+      - -Dcam=disabled
+      - -Dqcam=disabled
+      - -Dlc-compliance=disabled
+      - -Dtest=false
+      - -Ddocumentation=disabled
+      - -Dtracing=disabled
+      - -Dandroid=disabled
+      - -Dv4l2=disabled
+      - -Dlibdw=disabled
+      - -Dlibunwind=disabled
+      - -Dsoftisp-gpu=disabled
+      - -Dudev=enabled
+    build-options:
+      env:
+        PYTHONPATH: /app/lib/python3.14/site-packages
+    sources:
+      - type: archive
+        url: https://gitlab.freedesktop.org/camera/libcamera/-/archive/v0.7.2/libcamera-v0.7.2.tar.gz
+        sha256: 64881a4bafbda02f34861153d8f0d42be9ff46f5598408f9b585b07a10c448c9
+      # Flatpak's seccomp blocks clone3(); fork()+pidfd_open() fallback.
+      - type: patch
+        path: patches/libcamera-clone3-fallback.patch
