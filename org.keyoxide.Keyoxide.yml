@@ -65,6 +65,6 @@ modules:
       - type: archive
         url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.5/keyoxide-flutter-src.tar.gz
         strip-components: 0
-        sha256: c5711ff21483d3c2102a6a9b2d9cb54f47ca20863e8fe95cec08e07e67b67fb8
+        sha256: 4cba9908a48c4c0fc51aa73052d536315767c2b07d2e50e45ee2406bd9b94c34
       - pubspec-sources.json
 
