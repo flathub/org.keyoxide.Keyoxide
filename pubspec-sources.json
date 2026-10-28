@@ -2283,14 +2283,14 @@
     {
         "type": "git",
         "url": "https://codeberg.org/Berker/qr_code_scanner.git",
-        "commit": "2e01fd7f57e2ab81bb4959cea88715b6f5df60d4",
-        "dest": ".pub-cache/git/qr_code_scanner-2e01fd7f57e2ab81bb4959cea88715b6f5df60d4"
+        "commit": "9fb2f9d3025dd221cf0695362ecdd5bec2b7597f",
+        "dest": ".pub-cache/git/qr_code_scanner-9fb2f9d3025dd221cf0695362ecdd5bec2b7597f"
     },
     {
         "type": "shell",
         "commands": [
             "mkdir -p .pub-cache/git/cache/qr_code_scanner-e6127a9a50aa2a5a2eb783c51749c77dde0dc249",
-            "cp -rf .pub-cache/git/qr_code_scanner-2e01fd7f57e2ab81bb4959cea88715b6f5df60d4/.git/* .pub-cache/git/cache/qr_code_scanner-e6127a9a50aa2a5a2eb783c51749c77dde0dc249"
+            "cp -rf .pub-cache/git/qr_code_scanner-9fb2f9d3025dd221cf0695362ecdd5bec2b7597f/.git/* .pub-cache/git/cache/qr_code_scanner-e6127a9a50aa2a5a2eb783c51749c77dde0dc249"
         ]
     },
     {
