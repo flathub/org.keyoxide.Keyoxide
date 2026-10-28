@@ -13,6 +13,24 @@ finish-args:
   - --share=network
 modules:
   - flutter-sdk-3.44.9.json
+  - name: zxing-cpp
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DBUILD_SHARED_LIBS=ON
+      - -DZXING_EXAMPLES=OFF
+      - -DZXING_UNIT_TESTS=OFF
+      - -DZXING_BLACKBOX_TESTS=OFF
+      - -DZXING_WRITERS=OFF
+      - -DZXING_PYTHON_MODULE=OFF
+    sources:
+      # qr_code_scanner's Linux implementation links against zxing-cpp 2.x,
+      # which the freedesktop runtime/sdk does not ship.
+      - type: archive
+        url: https://github.com/zxing-cpp/zxing-cpp/archive/refs/tags/v2.3.0.tar.gz
+        sha256: 64e4139103fdbc57752698ee15b5f0b0f7af9a0331ecbdc492047e0772c417ba
   - name: Keyoxide
     buildsystem: simple
     build-options:
@@ -27,6 +45,9 @@ modules:
       prepend-ld-library-path: /usr/lib/sdk/llvm22/lib
       env:
         PUB_CACHE: /run/build/Keyoxide/.pub-cache
+        # zxing-cpp is built into /app before the app; point CMake at it.
+        CMAKE_PREFIX_PATH: /app
+        ZXing_DIR: /app/lib/cmake/ZXing
     build-commands:
       - flutter pub get --offline
       - flutter build linux --release --no-pub --target lib/app/flavors/main_production.dart
@@ -42,7 +63,8 @@ modules:
       - install -Dm644 packaging/flatpak/icons/org.keyoxide.Keyoxide.svg /app/share/icons/hicolor/scalable/apps/org.keyoxide.Keyoxide.svg
     sources:
       - type: archive
-        url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.4/keyoxide-flutter-src.tar.gz
+        url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.5/keyoxide-flutter-src.tar.gz
         strip-components: 0
-        sha256: 626e838edbcc2e6508fc10e6087b06fbecb443bab715b8c3b9d0d54b04fb069b
+        sha256: 4cba9908a48c4c0fc51aa73052d536315767c2b07d2e50e45ee2406bd9b94c34
       - pubspec-sources.json
+
