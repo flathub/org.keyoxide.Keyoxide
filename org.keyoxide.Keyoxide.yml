@@ -63,8 +63,8 @@ modules:
       - install -Dm644 packaging/flatpak/icons/org.keyoxide.Keyoxide.svg /app/share/icons/hicolor/scalable/apps/org.keyoxide.Keyoxide.svg
     sources:
       - type: archive
-        url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.5/keyoxide-flutter-src.tar.gz
+        url: https://codeberg.org/Berker/keyoxide-flutter/releases/download/2.4.6/keyoxide-flutter-src.tar.gz
         strip-components: 0
-        sha256: 4cba9908a48c4c0fc51aa73052d536315767c2b07d2e50e45ee2406bd9b94c34
+        sha256: cdd9144be5c193d96e12e6e81665b8d9653ab95e1b9a6bd02309c7897564b9a2
       - pubspec-sources.json
 
